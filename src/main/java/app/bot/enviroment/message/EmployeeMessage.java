@@ -173,7 +173,7 @@ public class EmployeeMessage {
 
     public SendMessage coefficientOptions(Long chatId) {
         builder.setLength(0);
-        builder.append("Выбирите ваш коэфициент\nПо умолчанию = 1");
+        builder.append("Выбирите ваш коэфициент");
         return getSendMessage(chatId, builder.toString(), employeeKeyboard.coefficient());
     }
 

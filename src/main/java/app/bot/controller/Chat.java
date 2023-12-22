@@ -93,6 +93,7 @@ public class Chat extends TelegramLongPollingBot {
         }
 
         if (update.hasMessage()) {
+            System.out.println(update.getMessage().getChatId());
             textMessageHandle(update);
         }
     }
@@ -199,6 +200,20 @@ public class Chat extends TelegramLongPollingBot {
     }
 
     private void adminsCallBackData(Long chatId, String data) {
+        if (data.equals("3")) {
+            deleteOldMessage(chatId);
+            Thread thread = new Thread(() -> {
+                updateExcel();
+                try {
+                    execute(adminMessage.getExcelFile(chatId));
+                    executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            thread.start();
+        }
+
         if (data.equals("0")) {
             executeMsg(adminMessage.whatAreWeGoingToDo(chatId, 1));
         }
@@ -242,18 +257,6 @@ public class Chat extends TelegramLongPollingBot {
         if (data.equals("delItem")) {
             deleteOldMessage(chatId);
             executeMsg(adminMessage.listItemsToDelete(chatId, ""));
-        }
-
-        if (data.equals("excel")) {
-            Thread thread = new Thread(() -> {
-                updateExcel();
-                try {
-                    execute(adminMessage.getExcelFile(chatId));
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            thread.start();
         }
     }
 

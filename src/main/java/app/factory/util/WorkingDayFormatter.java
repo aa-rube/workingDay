@@ -43,7 +43,7 @@ public class WorkingDayFormatter {
         }
 
         if (hoursMatcher.find()) {
-            workingDay.setExtraDay(hoursMatcher.group(1).toLowerCase().contains("основное время"));
+            workingDay.setExtraDay(text.toLowerCase().contains("переработка"));
             workingDay.setWorkingTime(Double.parseDouble(hoursMatcher.group(1).trim().split(",")[0]));
 
             if (workingDay.getWorkingTime() > 7.2) {
