@@ -1,4 +1,4 @@
-package app.bot.enviroment;
+package app.bot.service;
 
 import app.factory.model.Batch;
 import app.factory.model.Item;
@@ -12,8 +12,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class EmployeeHandler {
@@ -122,7 +125,7 @@ public class EmployeeHandler {
         return Math.min(parsedValue, 7.2);
     }
 
-    public String findItemsBatch(Item item, String data) {
+    public String findItemsBatch(String data) {
         int id = Integer.parseInt(data.split("_")[1]);
         return batchService.getBatchById(id).getBatchNumber();
     }
@@ -131,15 +134,5 @@ public class EmployeeHandler {
         return data.split("_")[1];
     }
 
-    //        ВАШ ОТЧЕТ ЗА 13.12
-//
-//        ФИО: ПИРИЕВА ВИКТОРИЯ ХОЗЕИНОВНА
-//        ЧАСЫ:  7.2, ОСНОВНОЕ ВРЕМЯ
-//        ИЗДЕЛИЕ: 85, 002
-//        РАЗРЯД: 4/16
-//        КОЭФИЦИЕНТ: 1
-    public WorkingDay getWorkingDayFromText(Long chatId, String text) {
-
-    }
 }
 

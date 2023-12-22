@@ -49,7 +49,6 @@ public class PeopleService {
 
     public Person findPersonById(int id) {
         Optional<Person> personOptional = peopleRepository.findById(id);
-
         return personOptional.orElse(null);
     }
 }

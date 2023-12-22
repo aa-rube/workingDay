@@ -41,7 +41,14 @@ public class StartKeyboard {
         list.setCallbackData("1");
         firstRow.add(list);
 
+        List<InlineKeyboardButton> second = new ArrayList<>();
+        InlineKeyboardButton excel = new InlineKeyboardButton();
+        excel.setText("Получить отчет");
+        excel.setCallbackData("excel");
+        second.add(excel);
+
         keyboardMatrix.add(firstRow);
+        keyboardMatrix.add(second);
         inLineKeyBoard.setKeyboard(keyboardMatrix);
         return inLineKeyBoard;
     }

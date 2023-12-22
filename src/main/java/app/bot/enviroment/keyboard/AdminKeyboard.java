@@ -44,8 +44,8 @@ public class AdminKeyboard {
 
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton back = new InlineKeyboardButton();
-        back.setText("ЗАКРЫТЬ");
-        back.setCallbackData("backToStart");
+        back.setText("Назад");
+        back.setCallbackData("1");
         backRow.add(back);
 
         keyboardMatrix.add(firstRow);
@@ -63,18 +63,18 @@ public class AdminKeyboard {
 
         List<InlineKeyboardButton> firstRow = new ArrayList<>();
         InlineKeyboardButton del = new InlineKeyboardButton();
-        del.setText("Удалить сотрудника".toUpperCase());
+        del.setText("Удалить сотрудника");
         del.setCallbackData("delEmployee");
         firstRow.add(del);
 
         InlineKeyboardButton add = new InlineKeyboardButton();
-        add.setText("Добавить сотрудника".toUpperCase());
+        add.setText("Добавить сотрудника");
         add.setCallbackData("addEmployee");
         firstRow.add(add);
 
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton back = new InlineKeyboardButton();
-        back.setText("ЗАКРЫТЬ");
+        back.setText("Назад");
         back.setCallbackData("backToStart");
         backRow.add(back);
 
@@ -87,14 +87,20 @@ public class AdminKeyboard {
     }
 
 
-    public InlineKeyboardMarkup getBack() {
+    public InlineKeyboardMarkup getBack(int i) {
+        String data = "";
+        if(i == 1) data = "1";
+        if (i == 2) data = "itemOptions";
+        if (i == 3) data = "addItem";
+
+
         InlineKeyboardMarkup inLineKeyBoard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboardMatrix = new ArrayList<>();
 
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton back = new InlineKeyboardButton();
-        back.setText("ЗАКРЫТЬ");
-        back.setCallbackData("backToStart");
+        back.setText("Назад");
+        back.setCallbackData(data);
         backRow.add(back);
 
         keyboardMatrix.add(backRow);
@@ -109,18 +115,18 @@ public class AdminKeyboard {
 
         List<InlineKeyboardButton> firstRow = new ArrayList<>();
         InlineKeyboardButton del = new InlineKeyboardButton();
-        del.setText("Удалить изделие".toUpperCase());
+        del.setText("Удалить изделие");
         del.setCallbackData("delItem");
         firstRow.add(del);
 
         InlineKeyboardButton add = new InlineKeyboardButton();
-        add.setText("Параметры изделий".toUpperCase());
+        add.setText("Параметры изделий");
         add.setCallbackData("itemOptions");
         firstRow.add(add);
 
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton back = new InlineKeyboardButton();
-        back.setText("ЗАКРЫТЬ");
+        back.setText("Назад");
         back.setCallbackData("backToStart");
         backRow.add(back);
 
@@ -148,15 +154,30 @@ public class AdminKeyboard {
 
         List<InlineKeyboardButton> backRow = new ArrayList<>();
         InlineKeyboardButton add = new InlineKeyboardButton();
-        add.setText("Добавить".toUpperCase());
+        add.setText("Добавить");
         add.setCallbackData("addItem");
 
         InlineKeyboardButton back = new InlineKeyboardButton();
-        back.setText("ЗАКРЫТЬ");
-        back.setCallbackData("backToStart");
+        back.setText("Назад");
+        back.setCallbackData("0");
         backRow.add(add);
         backRow.add(back);
 
+        keyboardMatrix.add(backRow);
+        inLineKeyBoard.setKeyboard(keyboardMatrix);
+        return inLineKeyBoard;
+    }
+
+    public InlineKeyboardMarkup deleteItemAndOptions() {
+        InlineKeyboardMarkup inLineKeyBoard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboardMatrix = new ArrayList<>();
+
+        List<InlineKeyboardButton> backRow = new ArrayList<>();
+        InlineKeyboardButton back = new InlineKeyboardButton();
+        back.setText("Назад");
+        back.setCallbackData("0");
+
+        backRow.add(back);
         keyboardMatrix.add(backRow);
         inLineKeyBoard.setKeyboard(keyboardMatrix);
         return inLineKeyBoard;

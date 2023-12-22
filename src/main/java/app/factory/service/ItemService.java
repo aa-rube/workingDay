@@ -24,12 +24,21 @@ public class ItemService {
         return itemRepository.findById(id).orElse(null);
     }
 
-    public Item saveItem(Item item) {
-        return itemRepository.save(item);
+    public void saveItem(Item item) {
+        itemRepository.save(item);
     }
 
     public void deleteItem(int id) {
         itemRepository.deleteById(id);
+    }
+
+    public void deleteItem(String text) {
+        int id = Integer.parseInt(text.split("_")[1]);
+        deleteItem(id);
+    }
+
+    public Item findByName(String s) {
+        return itemRepository.findByName(s);
     }
 }
 

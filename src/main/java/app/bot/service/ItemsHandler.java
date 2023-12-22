@@ -1,4 +1,4 @@
-package app.bot.enviroment;
+package app.bot.service;
 
 import app.factory.model.Batch;
 import app.factory.model.Item;

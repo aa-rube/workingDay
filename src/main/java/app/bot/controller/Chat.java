@@ -1,12 +1,15 @@
 package app.bot.controller;
 
 import app.bot.config.BotConfig;
-import app.bot.enviroment.*;
 import app.bot.enviroment.message.AdminMessage;
 import app.bot.enviroment.message.EmployeeMessage;
 import app.bot.enviroment.message.StartMessage;
+import app.bot.service.EmployeeHandler;
+import app.bot.service.ItemsHandler;
 import app.factory.model.WorkingDay;
 import app.factory.service.ExcelUpdater;
+import app.factory.service.RedisExample;
+import app.factory.service.WorkingDayFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
@@ -20,6 +23,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -37,6 +41,10 @@ public class Chat extends TelegramLongPollingBot {
     private AdminMessage adminMessage;
     @Autowired
     private ItemsHandler itemsHandler;
+    @Autowired
+    private WorkingDayFormatter workingDayByText;
+    @Autowired
+    private RedisExample redis;
     private final HashMap<Long, Integer> sortedListChatIdMsgId = new HashMap<>();
     private final HashMap<Long, Integer> chatIdMsgId = new HashMap<>();
     private final HashMap<Long, WorkingDay> currentDayInfo = new HashMap<>();
@@ -61,9 +69,18 @@ public class Chat extends TelegramLongPollingBot {
         return botConfig.getAdminId();
     }
 
-    @Scheduled(fixedRateString = "60000")
-    private void stopChattingWithAdmin() {
-
+    @Scheduled(fixedRate = 60000 * 5)
+    private void updateExcel() {
+        Thread thread = new Thread(() -> {
+        for (WorkingDay d : redis.getAllObjects()) {
+            try {
+                ExcelUpdater.writeData(d);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        });
+        thread.start();
     }
 
     @Override
@@ -83,7 +100,6 @@ public class Chat extends TelegramLongPollingBot {
             textMessageHandle(update);
         }
     }
-
 
     private void employeeCallBackData(Long chatId, String data) {
         System.out.println(data);
@@ -142,7 +158,7 @@ public class Chat extends TelegramLongPollingBot {
         }
 
         if (data.contains("employeeBatch_")) {
-            currentDayInfo.get(chatId).setBatch(employeeHandler.findItemsBatch(currentDayInfo.get(chatId).getItem(), data));
+            currentDayInfo.get(chatId).setBatch(employeeHandler.findItemsBatch(data));
             executeMsg(employeeMessage.getVolumeOptions(chatId));
             return;
         }
@@ -172,7 +188,8 @@ public class Chat extends TelegramLongPollingBot {
 
     private void writeAndClear(Long chatId, SendMessage msg) {
         try {
-            ExcelUpdater.writeData(currentDayInfo.get(chatId));
+           // ExcelUpdater.writeData(currentDayInfo.get(chatId));
+            redis.saveObject(currentDayInfo.get(chatId));
             currentDayInfo.remove(chatId);
 
         } catch (Exception e) {
@@ -227,6 +244,19 @@ public class Chat extends TelegramLongPollingBot {
             executeMsg(adminMessage.addBatch(chatId, Integer.parseInt(data.split("_")[1])));
         }
 
+        if (data.equals("delItem")) {
+            deleteOldMessage(chatId);
+            executeMsg(adminMessage.listItemsToDelete(chatId, ""));
+        }
+
+        if (data.equals("excel")) {
+            try {
+                updateExcel();
+                execute(adminMessage.getExcelFile(chatId));
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
     }
 
@@ -250,8 +280,9 @@ public class Chat extends TelegramLongPollingBot {
 
         if (text.contains("ВАШ ОТЧЕТ ЗА") && text.contains("ФИО:")) {
             currentDayInfo.remove(chatId);
-            currentDayInfo.put(chatId, employeeHandler.getWorkingDayFromText(chatId, text));
+            currentDayInfo.put(chatId, workingDayByText.getWorkingDayFromText(chatId, text));
             SendMessage msg = employeeMessage.finishMessage(chatId, currentDayInfo.get(chatId), true);
+
             try {
                 execute(msg);
             } catch (TelegramApiException e) {
@@ -279,10 +310,20 @@ public class Chat extends TelegramLongPollingBot {
         }
 
         if (addNewBatch.containsKey(chatId)) {
+
+            if (text.contains("/deleteBatch_")) {
+                executeMsg(adminMessage.deleteBatch(chatId,addNewBatch.get(chatId), text));
+                return;
+            }
+
             executeMsg(adminMessage
                     .executeNewBatch(chatId, itemsHandler
                             .addNewBatch(text, addNewBatch.get(chatId)), text, addNewBatch.get(chatId)));
             return;
+        }
+
+        if (text.contains("/removeItem_")) {
+            executeMsg(adminMessage.listItemsToDelete(chatId, text));
         }
     }
 

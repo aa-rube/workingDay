@@ -1,6 +1,6 @@
 package app.bot.enviroment.message;
 
-import app.bot.enviroment.EmployeeHandler;
+import app.bot.service.EmployeeHandler;
 import app.bot.enviroment.keyboard.EmployeeKeyboard;
 import app.factory.model.Item;
 import app.factory.model.Person;
@@ -13,7 +13,6 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -187,7 +186,9 @@ public class EmployeeMessage {
                         : "<b>проверьте всю информацию:</b>\n\n" + "Отчет за: " + data + "\n")
 
                 .append("ФИО: <b>").append(day.getFullName()).append("</b>\n")
-                .append("Часы:  <b>").append(day.getWorkingTime()).append(", ").append(day.isExtraDay() ? "переработка</b>\n" : "основное время</b>\n")
+                .append("Часы:  <b>").append(day.getWorkingTime()).append(", ")
+                .append(day.isExtraDay() ? "переработка</b>\n" : "основное время</b>\n")
+
                 .append("Изделие: <b>").append(day.getItem().getName()).append(", ").append(day.getBatch()).append("</b>\n")
                 .append("Разряд: <b>").append(day.getLevel()).append("</b>\n")
                 .append("коэфициент: <b>").append(day.getCoefficient()).append("</b>\n\n")

@@ -1,6 +1,5 @@
 package app.factory.service;
 
-import app.factory.model.Item;
 import app.factory.model.WorkingDay;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -11,20 +10,18 @@ import java.io.IOException;
 import java.text.DateFormatSymbols;
 import java.time.LocalDateTime;
 
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
 public class ExcelUpdater {
 
     public static void writeData(WorkingDay day) throws IOException {
-        try (FileInputStream fis = new FileInputStream("workbook.xlsx");
+        try (FileInputStream fis = new FileInputStream("workbook.xlsm");
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             updateOrInsertDate(workbook, day);
 
-            try (FileOutputStream fileOut = new FileOutputStream("workbook.xlsx")) {
+            try (FileOutputStream fileOut = new FileOutputStream("workbook.xlsm")) {
                 workbook.write(fileOut);
             }
 
@@ -34,9 +31,8 @@ public class ExcelUpdater {
         }
     }
 
-
     private static void updateOrInsertDate(Workbook workbook, WorkingDay workingDay) {
-        Sheet sheet = workbook.getSheet(workingDay.isExtraDay() ? "Лист2" : "Лист1");
+        Sheet sheet = workbook.getSheet(workingDay.isExtraDay() ? "сверхур" : "Data_Tech");
 
         int columnIndexMonth = 0;
         int columnIndexYear = 1;
@@ -50,10 +46,9 @@ public class ExcelUpdater {
         int currentRow = 2;
 
         Iterator<Row> rowIterator = sheet.iterator();
-
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            if (isRowEmpty(row)) {
+            if (isRowEmpty(row, columnIndexMonth)) {
                 createRow(row, workingDay);
                 foundMatch = true;
                 break;
@@ -102,15 +97,11 @@ public class ExcelUpdater {
         }
     }
 
-    private static boolean isRowEmpty(Row row) {
-        Iterator<Cell> cellIterator = row.iterator();
-        while (cellIterator.hasNext()) {
-            if (cellIterator.next().getCellType() != CellType.BLANK) {
-                return false;
-            }
-        }
-        return true;
+    private static boolean isRowEmpty(Row row, int columnIndex) {
+        Cell cell = row.getCell(columnIndex);
+        return cell == null || cell.getCellType() == CellType.BLANK;
     }
+
 
     private static String getMonthName(LocalDateTime dateTime) {
         return new DateFormatSymbols(new Locale("ru", "RU"))
