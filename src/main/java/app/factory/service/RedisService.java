@@ -2,7 +2,8 @@ package app.factory.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import app.factory.model.WorkingDay;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
@@ -11,8 +12,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 @Service
-public class RedisExample {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+public class RedisService {
+
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    public RedisService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
+    }
+
 
     public void saveObject(WorkingDay workingDay) {
         try (Jedis jedis = new Jedis("localhost", 6379)) {

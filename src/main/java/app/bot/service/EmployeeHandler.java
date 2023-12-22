@@ -27,12 +27,6 @@ public class EmployeeHandler {
     @Autowired
     private BatchService batchService;
 
-    public WorkingDay startReport(Long chatId) {
-        WorkingDay day = new WorkingDay();
-        day.setChatId(chatId);
-        return day;
-    }
-
     public String getFullNameById(String text) {
         int id = Integer.parseInt(text.split("_")[1]);
         Person p = peopleService.findPersonById(id);
@@ -102,8 +96,8 @@ public class EmployeeHandler {
         return false;
     }
 
-    public Item getItem(String data) {
-        return itemService.getItemById(Integer.parseInt(data.split("_")[1]));
+    public String getItem(String data) {
+        return itemService.getItemById(Integer.parseInt(data.split("_")[1])).getName();
     }
 
     public double getNewWorkingTimeValue(String text, boolean isExtraDay) {

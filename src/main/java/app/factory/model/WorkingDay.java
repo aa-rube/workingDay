@@ -7,25 +7,20 @@ import java.time.LocalDateTime;
 @Service
 public class WorkingDay {
     private int id;
-    private Long chatId;
     private String fullName;
     private boolean isExtraDay;
     private LocalDateTime localDateTime;
-    private Item item;
+    private String item;
     private String batch;
     private double workingTime;
     private String level;
     private String coefficient;
-    private String text;
-
-    public String getText() {
-        return text;
+    public String getItem() {
+        return item;
     }
-
-    public void setText(String text) {
-        this.text = text;
+    public void setItem(String item) {
+        this.item = item;
     }
-
     public String getCoefficient() {
         return coefficient;
     }
@@ -58,14 +53,6 @@ public class WorkingDay {
         this.workingTime = workingTime;
     }
 
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-
     public LocalDateTime getLocalDateTime() {
         return localDateTime;
     }
@@ -96,13 +83,5 @@ public class WorkingDay {
 
     public void setExtraDay(boolean extraDay) {
         isExtraDay = extraDay;
-    }
-
-    public Long getChatId() {
-        return chatId;
-    }
-
-    public void setChatId(Long chatId) {
-        this.chatId = chatId;
     }
 }

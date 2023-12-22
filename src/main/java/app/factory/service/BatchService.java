@@ -3,11 +3,9 @@ package app.factory.service;
 import app.factory.model.Batch;
 import app.factory.model.Item;
 import app.factory.repository.BatchRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
 import java.util.List;
 
 @Service

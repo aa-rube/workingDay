@@ -156,12 +156,13 @@ public class EmployeeMessage {
         };
     }
 
-    public SendMessage getBatchList(Long chatId, Item item) {
-        builder.setLength(0);
-        builder.append("Изделие <b>").append(item.getName()).append("</b>\n\n")
-                .append("<b>Выберите партию изделия:</b>");
+    public SendMessage getBatchList(Long chatId, String item) {
+        Item itemObject = itemService.findByName(item);
 
-        return getSendMessage(chatId, builder.toString(), employeeKeyboard.getBatchList(item.getBatches()));
+        builder.setLength(0);
+        builder.append("Изделие <b>").append(item).append("</b>\n\n")
+                .append("<b>Выберите партию изделия:</b>");
+        return getSendMessage(chatId, builder.toString(), employeeKeyboard.getBatchList(itemObject.getBatches()));
     }
 
     public SendMessage getVolumeOptions(Long chatId) {
@@ -179,20 +180,21 @@ public class EmployeeMessage {
     public SendMessage finishMessage(Long chatId, WorkingDay day, boolean isEnd) {
         builder.setLength(0);
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d.M.yyyy", new Locale("ru", "RU"));
+        DateTimeFormatter dateFormatter = DateTimeFormatter
+                .ofPattern("d.M.yyyy", new Locale("ru", "RU"));
         String data = "<b>" + day.getLocalDateTime().format(dateFormatter) + "</b>";
 
-        builder.append(isEnd ?"Информация записана!\n\nВаш отчет за " + data + "\n\n"
+        builder.append(isEnd ?"Информация записана!\n\n<code>Ваш отчет за " + data + "\n\n"
                         : "<b>проверьте всю информацию:</b>\n\n" + "Отчет за: " + data + "\n")
 
                 .append("ФИО: <b>").append(day.getFullName()).append("</b>\n")
                 .append("Часы:  <b>").append(day.getWorkingTime()).append(", ")
                 .append(day.isExtraDay() ? "переработка</b>\n" : "основное время</b>\n")
 
-                .append("Изделие: <b>").append(day.getItem().getName()).append(", ").append(day.getBatch()).append("</b>\n")
+                .append("Изделие: <b>").append(day.getItem()).append(", ").append(day.getBatch()).append("</b>\n")
                 .append("Разряд: <b>").append(day.getLevel()).append("</b>\n")
                 .append("коэфициент: <b>").append(day.getCoefficient()).append("</b>\n\n")
-                .append(isEnd ? "" : "Нажмите <b>\"продолжить\"</b>, если все верно");
+                .append(isEnd ? "</code>" : "Нажмите <b>\"продолжить\"</b>, если все верно");
 
         if (isEnd) {
             return getSendMessage(chatId, builder.toString(),null);

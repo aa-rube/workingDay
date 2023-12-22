@@ -76,7 +76,7 @@ public class ExcelUpdater {
 
                 if (monthName.equals(getMonthName(workingDay.getLocalDateTime())) &&
                         year.equals(String.valueOf(workingDay.getLocalDateTime().getYear())) &&
-                        itemName.equals(workingDay.getItem().getName()) &&
+                        itemName.equals(workingDay.getItem()) &&
                         batch.equals(workingDay.getBatch()) &&
                         coefficient.equals(workingDay.getCoefficient()) &&
                         fullName.equals(workingDay.getFullName()) &&
@@ -113,7 +113,7 @@ public class ExcelUpdater {
                 .getMonths()[workingDay.getLocalDateTime().getMonthValue() - 1];
         row.createCell(0).setCellValue(monthName);
         row.createCell(1).setCellValue(workingDay.getLocalDateTime().getYear());
-        row.createCell(2).setCellValue(workingDay.getItem().getName());
+        row.createCell(2).setCellValue(workingDay.getItem());
         row.createCell(3).setCellValue(workingDay.getBatch());
         row.createCell(4).setCellValue(workingDay.getCoefficient());
         row.createCell(5).setCellValue(workingDay.getFullName());
