@@ -47,8 +47,15 @@ public class StartKeyboard {
         excel.setCallbackData("3");
         second.add(excel);
 
+        List<InlineKeyboardButton> third = new ArrayList<>();
+        InlineKeyboardButton addNewFile = new InlineKeyboardButton();
+        addNewFile.setText("Заменить файл на новый");
+        addNewFile.setCallbackData("4");
+        third.add(addNewFile);
+
         keyboardMatrix.add(firstRow);
         keyboardMatrix.add(second);
+        keyboardMatrix.add(third);
         inLineKeyBoard.setKeyboard(keyboardMatrix);
         return inLineKeyBoard;
     }

@@ -55,7 +55,8 @@ public class WorkingDayFormatter {
             Item item = itemService.findByName(productMatcher.group(1).trim().split(",")[0]);
             workingDay.setItem(item.getName());
             item.getBatches().stream()
-                    .filter(b -> b.getBatchNumber().equals(productMatcher.group(1).trim().split(",")[1].replaceAll(" ", "")))
+                    .filter(b -> b.getBatchNumber().equals(productMatcher.group(1).trim()
+                            .split(",")[1].replaceAll(" ", "")))
                     .findFirst().ifPresent(b -> workingDay.setBatch(b.getBatchNumber()));
         }
 

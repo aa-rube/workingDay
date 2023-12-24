@@ -173,7 +173,7 @@ public class EmployeeMessage {
 
     public SendMessage coefficientOptions(Long chatId) {
         builder.setLength(0);
-        builder.append("Выбирите ваш коэфициент");
+        builder.append("Выбирите ваш коэффициент");
         return getSendMessage(chatId, builder.toString(), employeeKeyboard.coefficient());
     }
 
@@ -193,7 +193,7 @@ public class EmployeeMessage {
 
                 .append("Изделие: <b>").append(day.getItem()).append(", ").append(day.getBatch()).append("</b>\n")
                 .append("Разряд: <b>").append(day.getLevel()).append("</b>\n")
-                .append("коэфициент: <b>").append(day.getCoefficient()).append("</b>\n\n")
+                .append("коэффициент: <b>").append(day.getCoefficient()).append("</b>\n\n")
                 .append(isEnd ? "</code>" : "Нажмите <b>\"продолжить\"</b>, если все верно");
 
         if (isEnd) {

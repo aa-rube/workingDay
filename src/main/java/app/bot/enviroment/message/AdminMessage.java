@@ -1,6 +1,7 @@
 package app.bot.enviroment.message;
 
 import app.bot.enviroment.keyboard.AdminKeyboard;
+import app.bot.service.AdminHandler;
 import app.factory.model.Batch;
 import app.factory.model.Item;
 import app.factory.service.BatchService;
@@ -14,9 +15,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
-import java.io.File;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Set;
 
 @Service
 public class AdminMessage {
@@ -28,6 +28,8 @@ public class AdminMessage {
     private ItemService itemService;
     @Autowired
     private BatchService batchService;
+    @Autowired
+    private AdminHandler adminHandler;
     private final StringBuilder builder = new StringBuilder();
 
     private SendMessage getSendMessage(Long chatId, String text, InlineKeyboardMarkup markup) {
@@ -184,13 +186,41 @@ public class AdminMessage {
     }
 
     public SendDocument getExcelFile(Long chatId) {
-        builder.setLength(0);
         LocalDate date = LocalDate.now();
+
+        builder.setLength(0);
         builder.append("Отчет за ").append(date.getMonthValue()).append(".").append(date.getYear());
         SendDocument document = new SendDocument();
-        document.setDocument(new InputFile(new File("workbook.xlsm")));
+        document.setDocument(new InputFile(adminHandler.renameAndCopyFile(date)));
         document.setChatId(chatId);
         document.setCaption(builder.toString());
-        return  document;
+        return document;
+    }
+
+
+    public SendMessage addNewFile(Long chatId) {
+        builder.setLength(0);
+
+        builder.append("Загрузите новый файл для записи отчета сотрудников.");
+        return getSendMessage(chatId, builder.toString(), adminKeyboard.getBack(4));
+    }
+
+    public SendMessage getChangeFileStatus(Long chatId, boolean success) {
+        builder.setLength(0);
+        if (success) {
+            return getSendMessage(chatId, "Файл успешно заменен.", null);
+        }
+        return getSendMessage(chatId, "Что-то пошло не так", null);
+    }
+
+    public SendMessage wasReported(Long adminChatId, Set<String> allStrings) {
+        builder.setLength(0);
+        LocalDate date = LocalDate.now().minusDays(1);
+        builder.append("<b>Отчет за ").append(date.getDayOfMonth() + "." + date.getMonthValue()).append(" сдали:</b>\n");
+
+        for (String s : allStrings) {
+            builder.append(s).append("\n");
+        }
+        return getSendMessage(adminChatId, builder.toString(), null);
     }
 }

@@ -13,7 +13,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 @Service
 public class RedisService {
-
+    @Autowired
+    RedisStringService redisStringService;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -23,10 +24,11 @@ public class RedisService {
     }
 
 
-    public void saveObject(WorkingDay workingDay) {
+    public void saveWorkingDay(WorkingDay workingDay) {
         try (Jedis jedis = new Jedis("localhost", 6379)) {
             String key = "workingDay:" + workingDay.getId();
             jedis.set(key, objectMapper.writeValueAsString(workingDay));
+            redisStringService.addString(workingDay.getFullName()+", " + workingDay.getWorkingTime());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

@@ -1,4 +1,4 @@
-package app.factory.service;
+package app.factory.util;
 
 import app.factory.model.WorkingDay;
 import org.apache.poi.ss.usermodel.*;
@@ -16,12 +16,12 @@ import java.util.Locale;
 public class ExcelUpdater {
 
     public static void writeData(WorkingDay day) throws IOException {
-        try (FileInputStream fis = new FileInputStream("workbook.xlsm");
+        try (FileInputStream fis = new FileInputStream("data/workbook.xlsm");
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             updateOrInsertDate(workbook, day);
 
-            try (FileOutputStream fileOut = new FileOutputStream("workbook.xlsm")) {
+            try (FileOutputStream fileOut = new FileOutputStream("data/workbook.xlsm")) {
                 workbook.write(fileOut);
             }
 
@@ -34,7 +34,6 @@ public class ExcelUpdater {
     private static void updateOrInsertDate(Workbook workbook, WorkingDay workingDay) {
         Sheet sheet = workbook.getSheet(workingDay.isExtraDay() ? "сверхур" : "Data_Tech");
 
-        int columnIndexMonth = 0;
         int columnIndexYear = 1;
         int columnIndexItem = 2;
         int columnIndexBatch = 3;
@@ -43,18 +42,16 @@ public class ExcelUpdater {
         int columnIndexLevel = 6;
 
         boolean foundMatch = false;
-        int currentRow = 2;
 
         Iterator<Row> rowIterator = sheet.iterator();
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            if (isRowEmpty(row, columnIndexMonth)) {
+            if (isRowEmpty(row, columnIndexFullName)) {
                 createRow(row, workingDay);
                 foundMatch = true;
                 break;
             }
 
-            Cell cellMonth = row.getCell(columnIndexMonth);
             Cell cellYear = row.getCell(columnIndexYear);
             Cell cellItem = row.getCell(columnIndexItem);
             Cell cellBatch = row.getCell(columnIndexBatch);
@@ -62,11 +59,10 @@ public class ExcelUpdater {
             Cell cellFullName = row.getCell(columnIndexFullName);
             Cell cellLevel = row.getCell(columnIndexLevel);
 
-            if (cellMonth != null && cellYear != null && cellItem != null &&
+            if (cellYear != null && cellItem != null &&
                     cellBatch != null && cellCoefficient != null &&
                     cellFullName != null && cellLevel != null) {
 
-                String monthName = getCellValueAsString(cellMonth);
                 String year = getCellValueAsString(cellYear);
                 String itemName = getCellValueAsString(cellItem);
                 String batch = getCellValueAsString(cellBatch);
@@ -74,8 +70,7 @@ public class ExcelUpdater {
                 String fullName = getCellValueAsString(cellFullName);
                 String level = getCellValueAsString(cellLevel);
 
-                if (monthName.equals(getMonthName(workingDay.getLocalDateTime())) &&
-                        year.equals(String.valueOf(workingDay.getLocalDateTime().getYear())) &&
+                if (year.equals(String.valueOf(workingDay.getLocalDateTime().getYear())) &&
                         itemName.equals(workingDay.getItem()) &&
                         batch.equals(workingDay.getBatch()) &&
                         coefficient.equals(workingDay.getCoefficient()) &&
@@ -111,7 +106,6 @@ public class ExcelUpdater {
     private static void createRow(Row row, WorkingDay workingDay) {
         String monthName = new DateFormatSymbols(new Locale("ru", "RU"))
                 .getMonths()[workingDay.getLocalDateTime().getMonthValue() - 1];
-        row.createCell(0).setCellValue(monthName);
         row.createCell(1).setCellValue(workingDay.getLocalDateTime().getYear());
         row.createCell(2).setCellValue(workingDay.getItem());
         row.createCell(3).setCellValue(workingDay.getBatch());
@@ -141,7 +135,6 @@ public class ExcelUpdater {
             }
         }
     }
-
 
     private static String getCellValueAsString(Cell cell) {
         if (cell.getCellType() == CellType.NUMERIC) {

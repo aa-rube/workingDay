@@ -4,20 +4,25 @@ import app.bot.config.BotConfig;
 import app.bot.enviroment.message.AdminMessage;
 import app.bot.enviroment.message.EmployeeMessage;
 import app.bot.enviroment.message.StartMessage;
+import app.bot.service.AdminHandler;
 import app.bot.service.EmployeeHandler;
 import app.bot.service.ItemsHandler;
 import app.factory.model.WorkingDay;
-import app.factory.service.ExcelUpdater;
+import app.factory.service.RedisStringService;
+import app.factory.util.ExcelUpdater;
 import app.factory.service.RedisService;
 import app.factory.util.WorkingDayFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -45,6 +50,10 @@ public class Chat extends TelegramLongPollingBot {
     private WorkingDayFormatter workingDayByText;
     @Autowired
     private RedisService redis;
+    @Autowired
+    private AdminHandler adminHandler;
+    @Autowired
+    private RedisStringService redisStringService;
     private final HashMap<Long, Integer> chatIdMsgId = new HashMap<>();
     private final HashMap<Long, WorkingDay> currentDayInfo = new HashMap<>();
     private final HashMap<Long, Integer> forChooseDate = new HashMap<>();
@@ -52,12 +61,16 @@ public class Chat extends TelegramLongPollingBot {
     private final HashSet<Long> addNewItem = new HashSet<>();
     private final HashMap<Long, Integer> addNewBatch = new HashMap<>();
     private final HashSet<Long> inputNewWorkingTime = new HashSet<>();
+    private final HashSet<Long> addNewExcel = new HashSet<>();
+    @Override
+    public String getBotToken() {
+        return botConfig.getToken();
+    }
 
     @Override
     public String getBotUsername() {
         return botConfig.getBotName();
     }
-    
     public Long getAdminChatId() {
         return botConfig.getAdminId();
     }
@@ -72,6 +85,13 @@ public class Chat extends TelegramLongPollingBot {
             }
         }
         redis.deleteAllObjects();
+
+    }
+
+    @Scheduled(cron = "0 0 3 * * ?")
+    public void runScheduledTask() {
+        executeMsg(adminMessage.wasReported(getAdminChatId(), redisStringService.getAllStrings()));
+        redisStringService.deleteAllStrings();
     }
 
     @Override
@@ -81,22 +101,65 @@ public class Chat extends TelegramLongPollingBot {
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             String data = update.getCallbackQuery().getData();
 
-            clearWaitingLists(chatId);
             employeeCallBackData(chatId, data);
             adminsCallBackData(chatId, data);
             return;
         }
 
         if (update.hasMessage()) {
-            System.out.println(update.getMessage().getChatId());
-            textMessageHandle(update);
+            Long chatId = update.getMessage().getChatId();
+            String text = update.getMessage().getText();
+
+            if(update.getMessage().hasDocument()) {
+                documentHandler(update, chatId);
+                return;
+            }
+            textMessageHandle(chatId, text);
         }
+
+    }
+
+    private void documentHandler(Update update, Long chatId) {
+        if (chatId.equals(getAdminChatId()) && addNewExcel.contains(chatId)) {
+            executeMsg(adminMessage
+                    .getChangeFileStatus(chatId, adminHandler
+                            .saveFile(getFile(update.getMessage()), getBotToken())));
+            executeMsg(startMessage.getStart(chatId, getAdminChatId().equals(chatId)));
+            addNewExcel.clear();
+        }
+    }
+
+    private File getFile(Message message) {
+        String fileId = message.getDocument().getFileId();
+        GetFile getFile = new GetFile();
+        getFile.setFileId(fileId);
+        try {
+            return execute(getFile);
+        } catch (TelegramApiException e) {
+            return null;
+        }
+    }
+    private void getExcelFile(Long chatId, boolean needStart) {
+        deleteOldMessage(chatId);
+        Thread thread = new Thread(() -> {
+            updateExcel();
+            try {
+                execute(adminMessage.getExcelFile(chatId));
+                if (needStart) executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
+            } catch (TelegramApiException e) {
+                throw new RuntimeException(e);
+            }
+            adminHandler.deleteAllFilesInTempFolder();
+
+        });
+        thread.start();
     }
 
     private void employeeCallBackData(Long chatId, String data) {
 
         if (data.equals("/start")) {
             executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
+            return;
         }
 
         if (data.equals("reportStart")) {
@@ -111,7 +174,7 @@ public class Chat extends TelegramLongPollingBot {
         }
 
         if (data.contains("person_")) {
-            currentDayInfo.get(chatId).setFullName(employeeHandler.getFullNameById(data).toUpperCase());
+            currentDayInfo.get(chatId).setFullName(employeeHandler.getFullNameById(data));
             executeMsg(employeeMessage.extraDayOrMain(chatId, currentDayInfo.get(chatId).getFullName()));
         }
 
@@ -166,7 +229,6 @@ public class Chat extends TelegramLongPollingBot {
         }
 
         if (data.equals("employeeEnd")) {
-            System.out.println(data);
             deleteOldMessage(chatId);
             SendMessage msg = employeeMessage.finishMessage(chatId, currentDayInfo.get(chatId), true);
             try {
@@ -180,12 +242,12 @@ public class Chat extends TelegramLongPollingBot {
 
     private void writeAndClear(Long chatId, SendMessage msg) {
         try {
-            redis.saveObject(currentDayInfo.get(chatId));
+            redis.saveWorkingDay(currentDayInfo.get(chatId));
             currentDayInfo.remove(chatId);
-
         } catch (Exception e) {
             try {
                 execute(adminMessage.exceptionMsg(getAdminChatId(), msg));
+
             } catch (TelegramApiException ex) {
                 throw new RuntimeException(ex);
             }
@@ -195,18 +257,17 @@ public class Chat extends TelegramLongPollingBot {
     }
 
     private void adminsCallBackData(Long chatId, String data) {
+        clearWaitingLists(chatId);
+
+        if (data.equals("4")) {
+            getExcelFile(chatId, false);
+            executeMsg(adminMessage.addNewFile(chatId));
+            addNewExcel.add(chatId);
+            return;
+        }
+
         if (data.equals("3")) {
-            deleteOldMessage(chatId);
-            Thread thread = new Thread(() -> {
-                updateExcel();
-                try {
-                    execute(adminMessage.getExcelFile(chatId));
-                    executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            thread.start();
+            getExcelFile(chatId, true);
         }
 
         if (data.equals("0")) {
@@ -255,16 +316,14 @@ public class Chat extends TelegramLongPollingBot {
         }
     }
 
-    private void textMessageHandle(Update update) {
-        Long chatId = update.getMessage().getChatId();
-        String text = update.getMessage().getText();
+    private void textMessageHandle(Long chatId, String text) {
 
         if (text.equals("/start")) {
             executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
             return;
         }
 
-        if (text.contains("/delete_") && chatId.equals(getAdminChatId())) {
+        if (text.contains("/delete_") && (chatId.equals(getAdminChatId()))) {
             try {
                 execute(adminMessage.deleteEmployeeMsg(chatId, employeeHandler.deleteEmployeeById(text)));
             } catch (TelegramApiException e) {
@@ -272,6 +331,7 @@ public class Chat extends TelegramLongPollingBot {
             }
             return;
         }
+
 
         if (text.contains("ВАШ ОТЧЕТ ЗА") && text.contains("ФИО:")) {
             currentDayInfo.remove(chatId);
@@ -341,6 +401,7 @@ public class Chat extends TelegramLongPollingBot {
         addNewBatch.remove(chatId);
         addNewItem.remove(chatId);
         addNewEmployee.remove(chatId);
+        addNewExcel.clear();
     }
 
     private void executeMsg(SendMessage msg) {
