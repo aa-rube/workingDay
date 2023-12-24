@@ -99,9 +99,9 @@ public class AdminMessage {
 
     public SendMessage executeNewItem(Long chatId, boolean b, String text) {
         builder.setLength(0);
-
+        String adding = text.split("\n").length > 1 ? " " : " \"" + text.trim() + "\" ";
         if (b) {
-            builder.append("Изделие \"").append(text.trim()).append("\" успешно добавлено. Можно добавить еще одно.\n\n")
+            builder.append("Изделие").append(adding).append("успешно добавлено. Можно добавить еще.\n\n")
                     .append("Партии настраиваются позже, в параметрах каждого изделия");
             return getSendMessage(chatId, builder.toString(), adminKeyboard.getBack(2));
         }
@@ -147,8 +147,7 @@ public class AdminMessage {
     }
 
     public SendMessage deleteBatch(Long chatId, int itemId, String text) {
-        Integer id = Integer.valueOf(text.split("_")[1]);
-        batchService.deleteBatch(itemId, id);
+        batchService.deleteBatch(text);
         builder.setLength(0);
         builder.append("Партия удалена!\n\n")
                 .append("Введите наименование НОВОЙ партии для изделия:  <b>")

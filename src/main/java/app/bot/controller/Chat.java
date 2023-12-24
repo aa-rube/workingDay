@@ -57,12 +57,7 @@ public class Chat extends TelegramLongPollingBot {
     public String getBotUsername() {
         return botConfig.getBotName();
     }
-
-    @Override
-    public String getBotToken() {
-        return botConfig.getToken();
-    }
-
+    
     public Long getAdminChatId() {
         return botConfig.getAdminId();
     }
