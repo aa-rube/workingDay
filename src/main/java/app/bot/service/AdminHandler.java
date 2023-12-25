@@ -26,7 +26,7 @@ public class AdminHandler {
     private PeopleService peopleService;
 
     public File renameAndCopyFile(LocalDate date) {
-        File originalFile = new File("/home/onixmore/workingDay/data");
+        File originalFile = new File("/home/onixmore/workingDay/data/workbook.xlsm");
         String newFileName = "Отчет_" + date.getDayOfMonth() + "." +date.getMonthValue() + "." + date.getYear() + "_";
 
         try {
@@ -63,7 +63,7 @@ public class AdminHandler {
             URL url = new URL(fileUrl);
             InputStream inputStream = url.openStream();
 
-            try (FileOutputStream outputStream = new FileOutputStream("/home/onixmore/workingDay/data")) {
+            try (FileOutputStream outputStream = new FileOutputStream("/home/onixmore/workingDay/data/workbook.xlsm")) {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -88,5 +88,4 @@ public class AdminHandler {
                 .filter(name -> reports.stream().noneMatch(report -> report.split(",")[0].trim().equals(name)))
                 .collect(Collectors.toList());
     }
-
 }
