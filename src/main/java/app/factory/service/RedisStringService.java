@@ -6,25 +6,47 @@ import redis.clients.jedis.Jedis;
 import java.util.Set;
 @Service
 public class RedisStringService {
-    private static final String REDIS_KEY = "my_strings";
+    private static final String DAILY_REPORT = "dailyReport";
+    private static final String MONTH_DAY_REPORT = "monthReport";
 
-    public void addString(String value) {
+
+    public void addDayReport(String value) {
         try (Jedis jedis = new Jedis("localhost", 6379)) {
-            if (!jedis.sismember(REDIS_KEY, value)) {
-                jedis.sadd(REDIS_KEY, value);
+            if (!jedis.sismember(DAILY_REPORT, value)) {
+                jedis.sadd(DAILY_REPORT, value);
             }
         }
     }
 
-    public Set<String> getAllStrings() {
+    public Set<String> getAllDailyReports() {
         try (Jedis jedis = new Jedis("localhost",6379)) {
-           return jedis.smembers(REDIS_KEY);
+           return jedis.smembers(DAILY_REPORT);
         }
     }
 
-    public void deleteAllStrings() {
+    public void deleteAllDailyReports() {
         try (Jedis jedis = new Jedis("localhost", 6379)) {
-            jedis.del(REDIS_KEY);
+            jedis.del(DAILY_REPORT);
+        }
+    }
+
+    public void addMonthReport(String value) {
+        try (Jedis jedis = new Jedis("localhost", 6379)) {
+            if (!jedis.sismember(MONTH_DAY_REPORT, value)) {
+                jedis.sadd(MONTH_DAY_REPORT, value);
+            }
+        }
+    }
+
+    public Set<String> getAllMonthReports() {
+        try (Jedis jedis = new Jedis("localhost",6379)) {
+            return jedis.smembers(MONTH_DAY_REPORT);
+        }
+    }
+
+    public void deleteAllMonthReports() {
+        try (Jedis jedis = new Jedis("localhost", 6379)) {
+            jedis.del(MONTH_DAY_REPORT);
         }
     }
 }

@@ -51,4 +51,8 @@ public class PeopleService {
         Optional<Person> personOptional = peopleRepository.findById(id);
         return personOptional.orElse(null);
     }
+
+    public List<Person> findAll() {
+        return peopleRepository.findAll();
+    }
 }

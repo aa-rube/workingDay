@@ -29,6 +29,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -66,7 +68,6 @@ public class Chat extends TelegramLongPollingBot {
     public String getBotToken() {
         return botConfig.getToken();
     }
-
     @Override
     public String getBotUsername() {
         return botConfig.getBotName();
@@ -75,7 +76,12 @@ public class Chat extends TelegramLongPollingBot {
         return botConfig.getAdminId();
     }
 
-    @Scheduled(fixedRate = 60000 / 3)
+    @Scheduled(cron = "0 0 0 1 * ?")
+    public void runMonthlyTask() {
+        redisStringService.deleteAllMonthReports();
+    }
+
+    @Scheduled(fixedRate = 60000 * 3)
     private void updateExcel() {
         for (WorkingDay data : redis.getAllObjects()) {
             try {
@@ -89,9 +95,19 @@ public class Chat extends TelegramLongPollingBot {
     }
 
     @Scheduled(cron = "0 0 3 * * ?")
-    public void runScheduledTask() {
-        executeMsg(adminMessage.wasReported(getAdminChatId(), redisStringService.getAllStrings()));
-        redisStringService.deleteAllStrings();
+    public void everyDayMessage() {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalTime startTime = LocalTime.of(2, 30);
+        LocalTime endTime = LocalTime.of(3, 30);
+
+        if (isTimeInRange(currentDateTime.toLocalTime(), startTime, endTime)) {
+            executeMsg(adminMessage.wasReported(getAdminChatId(), redisStringService.getAllDailyReports()));
+            redisStringService.deleteAllDailyReports();
+        }
+    }
+
+    private static boolean isTimeInRange(LocalTime currentTime, LocalTime startTime, LocalTime endTime) {
+        return !currentTime.isBefore(startTime) && !currentTime.isAfter(endTime);
     }
 
     @Override
@@ -243,11 +259,13 @@ public class Chat extends TelegramLongPollingBot {
     private void writeAndClear(Long chatId, SendMessage msg) {
         try {
             redis.saveWorkingDay(currentDayInfo.get(chatId));
+            if (redis.checkExistReport(currentDayInfo.get(chatId))) {
+                execute(adminMessage.reportExist(getAdminChatId(), currentDayInfo.get(chatId)));
+            }
             currentDayInfo.remove(chatId);
         } catch (Exception e) {
             try {
                 execute(adminMessage.exceptionMsg(getAdminChatId(), msg));
-
             } catch (TelegramApiException ex) {
                 throw new RuntimeException(ex);
             }

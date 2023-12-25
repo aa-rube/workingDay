@@ -4,18 +4,22 @@ import app.bot.enviroment.keyboard.AdminKeyboard;
 import app.bot.service.AdminHandler;
 import app.factory.model.Batch;
 import app.factory.model.Item;
+import app.factory.model.WorkingDay;
 import app.factory.service.BatchService;
 import app.factory.service.ItemService;
 import app.factory.service.PeopleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -216,11 +220,35 @@ public class AdminMessage {
     public SendMessage wasReported(Long adminChatId, Set<String> allStrings) {
         builder.setLength(0);
         LocalDate date = LocalDate.now().minusDays(1);
-        builder.append("<b>Отчет за ").append(date.getDayOfMonth() + "." + date.getMonthValue()).append(" сдали:</b>\n");
+        builder.append("<b>Отчет за ").append(date.getDayOfMonth()).append(".")
+                .append(date.getMonthValue()).append(" сдали:</b>\n");
+
+        List<String> employsWithOutReport = adminHandler.getEmploysWithOutReport(allStrings);
+        if (employsWithOutReport.isEmpty()) {
+            builder.append("Ни один сотрудник не сдал отчет");
+            return getSendMessage(adminChatId, builder.toString(), null);
+        }
 
         for (String s : allStrings) {
             builder.append(s).append("\n");
         }
+
+        builder.append("\n\n_________________________________\nСотрудники, кто не сдавал отчет:\n\n");
+
+        for (String string : employsWithOutReport) {
+            builder.append(string).append("\n");
+        }
         return getSendMessage(adminChatId, builder.toString(), null);
+    }
+
+    public SendMessage reportExist(Long chatId, WorkingDay workingDay) {
+        builder.setLength(0);
+
+        builder.append("Сотрудник ").append(workingDay.getFullName()).append(" повторно отправиил отчет за ")
+                .append(workingDay.getLocalDateTime().getDayOfMonth()).append(".")
+                .append(workingDay.getLocalDateTime().getMonthValue()).append(".")
+                .append(workingDay.getLocalDateTime().getYear()).append(", ")
+                .append(workingDay.isExtraDay() ? "переработка": "основной график");
+        return getSendMessage(chatId, builder.toString(), null);
     }
 }

@@ -1,7 +1,9 @@
 package app.bot.service;
 
+import app.factory.model.Person;
+import app.factory.service.PeopleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,9 +13,18 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminHandler {
+
+    @Autowired
+    private PeopleService peopleService;
+
     public File renameAndCopyFile(LocalDate date) {
         File originalFile = new File("data/workbook.xlsm");
         String newFileName = "Отчет_" + date.getDayOfMonth() + "." +date.getMonthValue() + "." + date.getYear() + "_";
@@ -66,4 +77,16 @@ public class AdminHandler {
            return false;
         }
     }
+
+    public List<String> getEmploysWithOutReport(Set<String> reports) {
+        if (reports.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return peopleService.findAll().stream()
+                .map(person -> person.getSecondName() + " " + person.getName() + " " + person.getThirdName())
+                .filter(name -> reports.stream().noneMatch(report -> report.split(",")[0].trim().equals(name)))
+                .collect(Collectors.toList());
+    }
+
 }
