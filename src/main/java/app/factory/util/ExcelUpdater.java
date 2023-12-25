@@ -16,12 +16,12 @@ import java.util.Locale;
 public class ExcelUpdater {
 
     public static void writeData(WorkingDay day) throws IOException {
-        try (FileInputStream fis = new FileInputStream("data/workbook.xlsm");
+        try (FileInputStream fis = new FileInputStream("/home/onixmore/workingDay/data");
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             updateOrInsertDate(workbook, day);
 
-            try (FileOutputStream fileOut = new FileOutputStream("data/workbook.xlsm")) {
+            try (FileOutputStream fileOut = new FileOutputStream("/home/onixmore/workingDay/data")) {
                 workbook.write(fileOut);
             }
 

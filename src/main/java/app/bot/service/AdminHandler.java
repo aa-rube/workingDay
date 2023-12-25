@@ -26,11 +26,11 @@ public class AdminHandler {
     private PeopleService peopleService;
 
     public File renameAndCopyFile(LocalDate date) {
-        File originalFile = new File("data/workbook.xlsm");
+        File originalFile = new File("/home/onixmore/workingDay/data");
         String newFileName = "Отчет_" + date.getDayOfMonth() + "." +date.getMonthValue() + "." + date.getYear() + "_";
 
         try {
-            File tempDir = new File("data/temp");
+            File tempDir = new File("/home/onixmore/workingDay/data/temp");
             tempDir.mkdirs();
             File tempFile = File.createTempFile(newFileName, ".xlsm", tempDir);
             Files.copy(originalFile.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -43,7 +43,7 @@ public class AdminHandler {
     }
 
     public void deleteAllFilesInTempFolder() {
-        File tempDir = new File("data/temp");
+        File tempDir = new File("/home/onixmore/workingDay/data/temp");
 
         if (tempDir.exists() && tempDir.isDirectory()) {
             File[] files = tempDir.listFiles();
@@ -63,7 +63,7 @@ public class AdminHandler {
             URL url = new URL(fileUrl);
             InputStream inputStream = url.openStream();
 
-            try (FileOutputStream outputStream = new FileOutputStream("data/workbook.xlsm")) {
+            try (FileOutputStream outputStream = new FileOutputStream("/home/onixmore/workingDay/data")) {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
