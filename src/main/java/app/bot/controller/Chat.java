@@ -78,6 +78,7 @@ public class Chat extends TelegramLongPollingBot {
 
     @Scheduled(cron = "0 0 0 1 * ?")
     public void runMonthlyTask() {
+        getExcelFile(false);
         redisStringService.deleteAllMonthReports();
     }
 
@@ -155,13 +156,12 @@ public class Chat extends TelegramLongPollingBot {
             return null;
         }
     }
-    private void getExcelFile(Long chatId, boolean needStart) {
-        deleteOldMessage(chatId);
+    private void getExcelFile(boolean needStart) {
         Thread thread = new Thread(() -> {
             updateExcel();
             try {
-                execute(adminMessage.getExcelFile(chatId));
-                if (needStart) executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
+                execute(adminMessage.getExcelFile(getAdminChatId()));
+                if (needStart) executeMsg(startMessage.getStart(getAdminChatId(), true));
             } catch (TelegramApiException e) {
                 throw new RuntimeException(e);
             }
@@ -278,14 +278,14 @@ public class Chat extends TelegramLongPollingBot {
         clearWaitingLists(chatId);
 
         if (data.equals("4")) {
-            getExcelFile(chatId, false);
+            getExcelFile(false);
             executeMsg(adminMessage.addNewFile(chatId));
             addNewExcel.add(chatId);
             return;
         }
 
         if (data.equals("3")) {
-            getExcelFile(chatId, true);
+            getExcelFile(true);
         }
 
         if (data.equals("0")) {
