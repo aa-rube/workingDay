@@ -25,7 +25,7 @@ public class StartMessage {
 
     public SendMessage getStart(Long chatId, boolean isAdmin) {
         builder.setLength(0);
-        builder.append("<b>ПОМОГАТОР</b>\n\n");
+        builder.append("<b>Вас приветствует</b>ПОМОГАТОР\n\n");
 
         if (isAdmin) {
             builder.append("Это бот для взаимодействия с операторами. \nПо информации из бота они смогут быстро и легко ")

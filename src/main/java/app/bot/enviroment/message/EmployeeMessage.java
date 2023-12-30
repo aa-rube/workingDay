@@ -120,7 +120,7 @@ public class EmployeeMessage {
         builder.setLength(0);
 
         builder.append("РАБОТНИК: <b>").append(workingDay.getFullName()).append("</b>\n\n")
-                .append("ДАТА: <b>").append(getdateLine(workingDay.getLocalDateTime())).append("</b>\n\n")
+                .append("ДАТА: <b>").append(getDateLine(workingDay.getLocalDateTime())).append("</b>\n\n")
                 .append(workingDay.isExtraDay() ? "<b>ПЕРЕРАБОТКА</b>\n\n" : "")
                 .append("РАБОЧЕЕ ВРЕМЯ: <b>").append(workingDay.getWorkingTime()).append(" ЧАСА</b>");
         if (i == 1) {
@@ -129,7 +129,7 @@ public class EmployeeMessage {
         if (i == 0){
             builder.append("\n\n");
         }
-                builder.append("если время не верно - отправьте другое значение\n\n")
+                builder.append("Если время не верно - введите в строке сообщения свое значение рабочего времени, далее нажмите стрелку.\n\n")
                 .append("НАЖМИТЕ <b>ПРОДОЛЖИТЬ</b>, ЕСЛИ ВСЕ ВЕРНО");
 
         return getSendMessage(chatId, builder.toString(), employeeKeyboard.approveAndContinue(false));
@@ -142,7 +142,7 @@ public class EmployeeMessage {
         return getSendMessage(chatId, builder.toString(), employeeKeyboard.getItemsList(itemService.getAllItems()));
     }
 
-    private String getdateLine(LocalDateTime dateTime) {
+    private String getDateLine(LocalDateTime dateTime) {
         long daysDifference = ChronoUnit.DAYS.between(LocalDate.now(), LocalDate.from(dateTime));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM (EEEE)", new Locale("ru"));
@@ -167,13 +167,13 @@ public class EmployeeMessage {
 
     public SendMessage getVolumeOptions(Long chatId) {
         builder.setLength(0);
-        builder.append("Выбирите свой разряд (выполняемая операция приравнивается к определенному разряду работ)");
+        builder.append("Выберите свой разряд (выполняемая операция приравнивается к определенному разряду работ)");
         return getSendMessage(chatId, builder.toString(), employeeKeyboard.volume());
     }
 
     public SendMessage coefficientOptions(Long chatId) {
         builder.setLength(0);
-        builder.append("Выбирите ваш коэффициент");
+        builder.append("Выберите ваш коэффициент");
         return getSendMessage(chatId, builder.toString(), employeeKeyboard.coefficient());
     }
 
@@ -185,15 +185,14 @@ public class EmployeeMessage {
         String data = "<b>" + day.getLocalDateTime().format(dateFormatter) + "</b>";
 
         builder.append(isEnd ?"Информация записана!\n\n<code>Ваш отчет за " + data + "\n\n"
-                        : "<b>проверьте всю информацию:</b>\n\n" + "Отчет за: " + data + "\n")
+                        : "<b>проверьте всю информацию:</b>\n\n" + "Отчет за: " + data).append(isEnd ? "\n" : "❗️\n\n")
 
-                .append("ФИО: <b>").append(day.getFullName()).append("</b>\n")
+                .append("ФИО: <b>").append(day.getFullName()).append(isEnd ? "" : "❗️\n").append("</b>\n")
                 .append("Часы:  <b>").append(day.getWorkingTime()).append(", ")
-                .append(day.isExtraDay() ? "переработка</b>\n" : "основное время</b>\n")
-
-                .append("Изделие: <b>").append(day.getItem()).append(", ").append(day.getBatch()).append("</b>\n")
-                .append("Разряд: <b>").append(day.getLevel()).append("</b>\n")
-                .append("коэффициент: <b>").append(day.getCoefficient()).append("</b>\n\n")
+                .append(day.isExtraDay() ? "переработка</b>\n" : "основное время</b>").append(isEnd ? "\n" : "❗️\n\n")
+                .append("Изделие: <b>").append(day.getItem()).append(", ").append(day.getBatch()).append(isEnd ? "" : "❗️\n").append("</b>\n")
+                .append("Разряд: <b>").append(day.getLevel()).append(isEnd ? "" : "❗️\n").append("</b>\n")
+                .append("коэффициент: <b>").append(day.getCoefficient()).append(isEnd ? "" : "❗️").append("</b>\n\n")
                 .append(isEnd ? "</code>" : "Нажмите <b>\"продолжить\"</b>, если все верно");
 
         if (isEnd) {
