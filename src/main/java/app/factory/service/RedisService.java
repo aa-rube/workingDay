@@ -69,6 +69,7 @@ public class RedisService {
             return true;
         }
         redisStringService.addMonthReport(report);
+        redisStringService.addLog(workingDay.toString());
         return false;
     }
 }

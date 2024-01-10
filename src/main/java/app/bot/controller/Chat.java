@@ -79,7 +79,7 @@ public class Chat extends TelegramLongPollingBot {
     @Scheduled(cron = "0 0 0 1 * ?")
     public void runMonthlyTask() {
         getExcelFile(false);
-        // redisStringService.deleteAllMonthReports();
+        redisStringService.deleteAllMonthReports();
     }
 
     @Scheduled(fixedRate = 60000 * 3)
@@ -97,7 +97,6 @@ public class Chat extends TelegramLongPollingBot {
             }
         }
         redis.deleteAllObjects();
-
     }
 
     @Scheduled(cron = "0 0 3 * * ?")

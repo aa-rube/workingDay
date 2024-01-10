@@ -84,4 +84,9 @@ public class WorkingDay {
     public void setExtraDay(boolean extraDay) {
         isExtraDay = extraDay;
     }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }
