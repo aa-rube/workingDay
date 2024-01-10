@@ -79,11 +79,16 @@ public class Chat extends TelegramLongPollingBot {
     @Scheduled(cron = "0 0 0 1 * ?")
     public void runMonthlyTask() {
         getExcelFile(false);
-        redisStringService.deleteAllMonthReports();
+        // redisStringService.deleteAllMonthReports();
     }
 
     @Scheduled(fixedRate = 60000 * 3)
     private void updateExcel() {
+        for (String s : redisStringService.getAllMonthReports()) {
+            System.out.println(s);
+        }
+
+
         for (WorkingDay data : redis.getAllObjects()) {
             try {
                 ExcelUpdater.writeData(data);

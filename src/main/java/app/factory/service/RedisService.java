@@ -62,7 +62,9 @@ public class RedisService {
     }
 
     public boolean checkExistReport(WorkingDay workingDay) {
-        String report = workingDay.getFullName() + ", " + workingDay.getLocalDateTime().getDayOfMonth();
+        String report = workingDay.getFullName() + ", " + workingDay.getLocalDateTime().getDayOfMonth() +
+                ", " +  workingDay.getWorkingTime() + ", " + workingDay.getItem() + ", " + workingDay.getBatch();
+
         if (redisStringService.getAllMonthReports().contains(report)) {
             return true;
         }
