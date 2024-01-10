@@ -84,10 +84,6 @@ public class Chat extends TelegramLongPollingBot {
 
     @Scheduled(fixedRate = 60000 * 3)
     private void updateExcel() {
-        for (String s : redisStringService.getAllMonthReports()) {
-            System.out.println(s);
-        }
-
 
         for (WorkingDay data : redis.getAllObjects()) {
             try {
