@@ -99,9 +99,6 @@ public class Chat extends TelegramLongPollingBot {
 
     @Scheduled(cron = "0 0 3 * * ?")
     public void everyDayMessage() {
-        executeLongMsg(adminMessage.wasReported(795363892L, redisStringService.getAllDailyReports()));
-
-
         LocalDateTime currentDateTime = LocalDateTime.now();
         LocalTime startTime = LocalTime.of(2, 30);
         LocalTime endTime = LocalTime.of(3, 30);
@@ -342,7 +339,7 @@ public class Chat extends TelegramLongPollingBot {
     private void textMessageHandle(Long chatId, String text) {
 
         if(text.equals("/dailyReport")) {
-            everyDayMessage();
+            executeLongMsg(adminMessage.wasReported(chatId, redisStringService.getAllDailyReports()));
             return;
         }
 
@@ -469,7 +466,6 @@ public class Chat extends TelegramLongPollingBot {
         }
     }
 
-
     private void executeLongMsg(SendMessage msg) {
 
         String text = msg.getText();
@@ -487,7 +483,7 @@ public class Chat extends TelegramLongPollingBot {
                 chunkMsg.setChatId(msg.getChatId());
                 chunkMsg.setText(chunk);
                 chunkMsg.setReplyMarkup(msg.getReplyMarkup());
-                
+                chunkMsg.setParseMode(ParseMode.HTML);
                 try {
                     execute(chunkMsg);
                 } catch (TelegramApiException e) {
