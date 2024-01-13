@@ -31,8 +31,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 @Controller
 public class Chat extends TelegramLongPollingBot {
@@ -95,18 +97,19 @@ public class Chat extends TelegramLongPollingBot {
         redis.deleteAllObjects();
     }
 
-    //@Scheduled(cron = "0 0 3 * * ?")
-    public void everyDayMessage(Long c) {
-        executeMsg(adminMessage.wasReported(c, redisStringService.getAllDailyReports()));
+    @Scheduled(cron = "0 0 3 * * ?")
+    public void everyDayMessage() {
+        executeLongMsg(adminMessage.wasReported(795363892L, redisStringService.getAllDailyReports()));
 
-//        LocalDateTime currentDateTime = LocalDateTime.now();
-//        LocalTime startTime = LocalTime.of(2, 30);
-//        LocalTime endTime = LocalTime.of(3, 30);
-//
-//        if (isTimeInRange(currentDateTime.toLocalTime(), startTime, endTime)) {
-//            executeMsg(adminMessage.wasReported(getAdminChatId(), redisStringService.getAllDailyReports()));
-//            redisStringService.deleteAllDailyReports();
-//        }
+
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        LocalTime startTime = LocalTime.of(2, 30);
+        LocalTime endTime = LocalTime.of(3, 30);
+
+        if (isTimeInRange(currentDateTime.toLocalTime(), startTime, endTime)) {
+            executeLongMsg(adminMessage.wasReported(getAdminChatId(), redisStringService.getAllDailyReports()));
+            redisStringService.deleteAllDailyReports();
+        }
     }
 
     private static boolean isTimeInRange(LocalTime currentTime, LocalTime startTime, LocalTime endTime) {
@@ -339,7 +342,7 @@ public class Chat extends TelegramLongPollingBot {
     private void textMessageHandle(Long chatId, String text) {
 
         if(text.equals("/dailyReport")) {
-            everyDayMessage(chatId);
+            everyDayMessage();
             return;
         }
 
@@ -463,6 +466,36 @@ public class Chat extends TelegramLongPollingBot {
             execute(del);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    private void executeLongMsg(SendMessage msg) {
+
+        String text = msg.getText();
+        int chunkSize = 4000;
+
+        if (text.length() > chunkSize) {
+            int numChunks = (int) Math.ceil((double) text.length() / chunkSize);
+
+            for (int i = 0; i < numChunks; i++) {
+                int start = i * chunkSize;
+                int end = Math.min((i + 1) * chunkSize, text.length());
+                String chunk = text.substring(start, end);
+
+                SendMessage chunkMsg = new SendMessage();
+                chunkMsg.setChatId(msg.getChatId());
+                chunkMsg.setText(chunk);
+                chunkMsg.setReplyMarkup(msg.getReplyMarkup());
+
+            }
+
+        } else {
+            try {
+                execute(msg);
+            } catch (TelegramApiException e) {
+
+            }
         }
     }
 }
