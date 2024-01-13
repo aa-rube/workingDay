@@ -95,7 +95,7 @@ public class Chat extends TelegramLongPollingBot {
         redis.deleteAllObjects();
     }
 
-    @Scheduled(cron = "0 0 3 * * ?")
+    //@Scheduled(cron = "0 0 3 * * ?")
     public void everyDayMessage(Long c) {
         executeMsg(adminMessage.wasReported(c, redisStringService.getAllDailyReports()));
 
