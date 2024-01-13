@@ -96,15 +96,17 @@ public class Chat extends TelegramLongPollingBot {
     }
 
     @Scheduled(cron = "0 0 3 * * ?")
-    public void everyDayMessage() {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        LocalTime startTime = LocalTime.of(2, 30);
-        LocalTime endTime = LocalTime.of(3, 30);
+    public void everyDayMessage(Long c) {
+        executeMsg(adminMessage.wasReported(c, redisStringService.getAllDailyReports()));
 
-        if (isTimeInRange(currentDateTime.toLocalTime(), startTime, endTime)) {
-            executeMsg(adminMessage.wasReported(getAdminChatId(), redisStringService.getAllDailyReports()));
-            redisStringService.deleteAllDailyReports();
-        }
+//        LocalDateTime currentDateTime = LocalDateTime.now();
+//        LocalTime startTime = LocalTime.of(2, 30);
+//        LocalTime endTime = LocalTime.of(3, 30);
+//
+//        if (isTimeInRange(currentDateTime.toLocalTime(), startTime, endTime)) {
+//            executeMsg(adminMessage.wasReported(getAdminChatId(), redisStringService.getAllDailyReports()));
+//            redisStringService.deleteAllDailyReports();
+//        }
     }
 
     private static boolean isTimeInRange(LocalTime currentTime, LocalTime startTime, LocalTime endTime) {
@@ -337,7 +339,7 @@ public class Chat extends TelegramLongPollingBot {
     private void textMessageHandle(Long chatId, String text) {
 
         if(text.equals("/dailyReport")) {
-            everyDayMessage();
+            everyDayMessage(chatId);
             return;
         }
 
