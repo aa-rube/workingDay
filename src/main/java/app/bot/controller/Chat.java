@@ -336,6 +336,11 @@ public class Chat extends TelegramLongPollingBot {
 
     private void textMessageHandle(Long chatId, String text) {
 
+        if(text.equals("/dailyReport")) {
+            everyDayMessage();
+            return;
+        }
+
         if (text.equals("/start")) {
             executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
             return;
