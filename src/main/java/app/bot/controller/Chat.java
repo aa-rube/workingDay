@@ -473,7 +473,7 @@ public class Chat extends TelegramLongPollingBot {
     private void executeLongMsg(SendMessage msg) {
 
         String text = msg.getText();
-        int chunkSize = 4000;
+        int chunkSize = 4096;
 
         if (text.length() > chunkSize) {
             int numChunks = (int) Math.ceil((double) text.length() / chunkSize);
@@ -487,7 +487,12 @@ public class Chat extends TelegramLongPollingBot {
                 chunkMsg.setChatId(msg.getChatId());
                 chunkMsg.setText(chunk);
                 chunkMsg.setReplyMarkup(msg.getReplyMarkup());
-
+                
+                try {
+                    execute(chunkMsg);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
         } else {
