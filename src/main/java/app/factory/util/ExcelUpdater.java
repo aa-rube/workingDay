@@ -14,14 +14,14 @@ import java.util.Iterator;
 import java.util.Locale;
 
 public class ExcelUpdater {
-
+    private final static String PATH = "/home/onixmore/workingDay/data/workbook.xlsm";
     public static void writeData(WorkingDay day) throws IOException {
-        try (FileInputStream fis = new FileInputStream("/home/onixmore/workingDay/data/workbook.xlsm");
+        try (FileInputStream fis = new FileInputStream(PATH);
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             updateOrInsertDate(workbook, day);
 
-            try (FileOutputStream fileOut = new FileOutputStream("/home/onixmore/workingDay/data/workbook.xlsm")) {
+            try (FileOutputStream fileOut = new FileOutputStream(PATH)) {
                 workbook.write(fileOut);
             }
 
@@ -98,14 +98,7 @@ public class ExcelUpdater {
     }
 
 
-    private static String getMonthName(LocalDateTime dateTime) {
-        return new DateFormatSymbols(new Locale("ru", "RU"))
-                .getMonths()[dateTime.getMonthValue() - 1];
-    }
-
     private static void createRow(Row row, WorkingDay workingDay) {
-        String monthName = new DateFormatSymbols(new Locale("ru", "RU"))
-                .getMonths()[workingDay.getLocalDateTime().getMonthValue() - 1];
         row.createCell(1).setCellValue(workingDay.getLocalDateTime().getYear());
         row.createCell(2).setCellValue(workingDay.getItem());
         row.createCell(3).setCellValue(workingDay.getBatch());

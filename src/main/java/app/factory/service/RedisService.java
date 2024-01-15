@@ -68,6 +68,7 @@ public class RedisService {
         if (redisStringService.getAllMonthReports().contains(report)) {
             return true;
         }
+
         redisStringService.addMonthReport(report);
         redisStringService.addLog(workingDay.toString());
         return false;
