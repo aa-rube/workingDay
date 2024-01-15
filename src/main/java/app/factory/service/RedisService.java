@@ -65,15 +65,18 @@ public class RedisService {
     }
 
     public boolean checkExistReport(WorkingDay workingDay, boolean isSuperUSer) {
-        String report = workingDay.getFullName() + ", " + workingDay.getLocalDateTime().getDayOfMonth() + ", "
-                + workingDay.getWorkingTime() + ", " + workingDay.getItem() + ", " + workingDay.getBatch() + ", "
-                + workingDay.getLevel() + ", " + workingDay.getCoefficient();
 
-        if (!LocalDateTime.now().minusDays(7).isBefore(workingDay.getLocalDateTime()) || isSuperUSer) {
+        if (LocalDateTime.now().minusDays(7).isBefore(workingDay.getLocalDateTime()) || isSuperUSer) {
+
+            String report = workingDay.getFullName() + ", " + workingDay.getLocalDateTime().getDayOfMonth() + ", "
+                    + workingDay.getWorkingTime() + ", " + workingDay.getItem() + ", " + workingDay.getBatch() + ", "
+                    + workingDay.getLevel() + ", " + workingDay.getCoefficient();
+
             redisStringService.addMonthReport(report);
             redisStringService.addLog(workingDay.toString());
             return false;
         }
+
         return true;
     }
 }
