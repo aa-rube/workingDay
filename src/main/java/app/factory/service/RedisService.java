@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,17 +64,16 @@ public class RedisService {
         }
     }
 
-    public boolean checkExistReport(WorkingDay workingDay) {
+    public boolean checkExistReport(WorkingDay workingDay, boolean isSuperUSer) {
         String report = workingDay.getFullName() + ", " + workingDay.getLocalDateTime().getDayOfMonth() + ", "
                 + workingDay.getWorkingTime() + ", " + workingDay.getItem() + ", " + workingDay.getBatch() + ", "
                 + workingDay.getLevel() + ", " + workingDay.getCoefficient();
 
-        if (redisStringService.getAllMonthReports().contains(report)) {
-            return true;
+        if (!LocalDateTime.now().minusDays(7).isBefore(workingDay.getLocalDateTime()) || isSuperUSer) {
+            redisStringService.addMonthReport(report);
+            redisStringService.addLog(workingDay.toString());
+            return false;
         }
-
-        redisStringService.addMonthReport(report);
-        redisStringService.addLog(workingDay.toString());
-        return false;
+        return true;
     }
 }

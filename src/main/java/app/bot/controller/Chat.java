@@ -261,7 +261,7 @@ public class Chat extends TelegramLongPollingBot {
     private void writeAndClear(Long chatId, SendMessage msg) {
         try {
             redis.saveWorkingDay(currentDayInfo.get(chatId));
-            if (redis.checkExistReport(currentDayInfo.get(chatId))) {
+            if (redis.checkExistReport(currentDayInfo.get(chatId), chatId.equals(1000000L))) {
                 execute(adminMessage.reportExist(getAdminChatId(), currentDayInfo.get(chatId)));
             }
             currentDayInfo.remove(chatId);
