@@ -28,7 +28,8 @@ public class RedisService {
 
     public void saveWorkingDay(WorkingDay workingDay) {
         try (Jedis jedis = new Jedis("localhost", 6379)) {
-            String key = "workingDay:" + workingDay.getId();
+            String key = "workingDay:" + workingDay.toString();
+
             jedis.set(key, objectMapper.writeValueAsString(workingDay));
             String report = workingDay.getFullName() + ", " + workingDay.getWorkingTime();
             redisStringService.addDayReport(report);
