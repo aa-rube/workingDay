@@ -340,7 +340,7 @@ public class Chat extends TelegramLongPollingBot {
 
         if(text.equals("/loglog")) {
             for (String s : redisStringService.getAllMonthReports()) {
-                System.out.printf(s);
+                System.out.println(s);
             }
         }
 
