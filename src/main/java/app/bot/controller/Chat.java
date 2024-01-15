@@ -338,6 +338,12 @@ public class Chat extends TelegramLongPollingBot {
 
     private void textMessageHandle(Long chatId, String text) {
 
+        if(text.equals("/loglog")) {
+            for (String s : redisStringService.getAllMonthReports()) {
+                System.out.printf(s);
+            }
+        }
+
         if(text.equals("/dailyReport")) {
             executeLongMsg(adminMessage.wasReported(chatId, redisStringService.getAllDailyReports()));
             return;

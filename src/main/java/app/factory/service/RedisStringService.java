@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 import java.util.Set;
+
 @Service
 public class RedisStringService {
     private static final String DAILY_REPORT = "dailyReport";
@@ -19,8 +20,8 @@ public class RedisStringService {
     }
 
     public Set<String> getAllDailyReports() {
-        try (Jedis jedis = new Jedis("localhost",6379)) {
-           return jedis.smembers(DAILY_REPORT);
+        try (Jedis jedis = new Jedis("localhost", 6379)) {
+            return jedis.smembers(DAILY_REPORT);
         }
     }
 
@@ -32,14 +33,12 @@ public class RedisStringService {
 
     public void addMonthReport(String value) {
         try (Jedis jedis = new Jedis("localhost", 6379)) {
-            if (!jedis.sismember(MONTH_DAY_REPORT, value)) {
-                jedis.sadd(MONTH_DAY_REPORT, value);
-            }
+            jedis.sadd(MONTH_DAY_REPORT, value);
         }
     }
 
     public Set<String> getAllMonthReports() {
-        try (Jedis jedis = new Jedis("localhost",6379)) {
+        try (Jedis jedis = new Jedis("localhost", 6379)) {
             return jedis.smembers(MONTH_DAY_REPORT);
         }
     }

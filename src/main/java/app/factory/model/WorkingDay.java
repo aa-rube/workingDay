@@ -87,6 +87,16 @@ public class WorkingDay {
 
     @Override
     public String toString() {
-        return super.toString();
+        return "WorkingDay{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", isExtraDay=" + isExtraDay +
+                ", localDateTime=" + localDateTime +
+                ", item='" + item + '\'' +
+                ", batch='" + batch + '\'' +
+                ", workingTime=" + workingTime +
+                ", level='" + level + '\'' +
+                ", coefficient='" + coefficient + '\'' +
+                '}';
     }
 }
