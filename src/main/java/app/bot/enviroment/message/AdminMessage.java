@@ -244,7 +244,7 @@ public class AdminMessage {
     public SendMessage reportExist(Long chatId, WorkingDay workingDay) {
         builder.setLength(0);
 
-        builder.append("Сотрудник ").append(workingDay.getFullName()).append(" повторно отправил отчет за ")
+        builder.append("Сотрудник ").append(workingDay.getFullName()).append(" пытается внести изменения в отчет за ")
                 .append(workingDay.getLocalDateTime().getDayOfMonth()).append(".")
                 .append(workingDay.getLocalDateTime().getMonthValue()).append(".")
                 .append(workingDay.getLocalDateTime().getYear()).append(", ")
