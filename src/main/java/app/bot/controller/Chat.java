@@ -176,7 +176,7 @@ public class Chat extends TelegramLongPollingBot {
     private void employeeCallBackData(Long chatId, String data) {
 
         if (data.equals("/start")) {
-            executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
+            executeMsg(startMessage.getStart(chatId, false));
             return;
         }
 
@@ -350,6 +350,11 @@ public class Chat extends TelegramLongPollingBot {
         }
 
         if (text.equals("/start")) {
+            executeMsg(startMessage.getStart(chatId, false));
+            return;
+        }
+
+        if (text.equals("/admin")) {
             executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
             return;
         }
