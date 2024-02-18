@@ -97,7 +97,29 @@ public class Chat extends TelegramLongPollingBot {
         redis.deleteAllObjects();
     }
 
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 9 * * ?")
+    public void everyDayMessageWithRetry() {
+        final int maxAttempts = 5;
+        int attempt = 0;
+        boolean success = false;
+
+        while (attempt < maxAttempts && !success) {
+            try {
+                attempt++;
+                everyDayMessage();
+                success = true;
+            } catch (Exception e) {
+                if (attempt < maxAttempts) {
+                    try {
+                        Thread.sleep(100000 * (long) Math.pow(2, attempt));
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        }
+    }
+
     public void everyDayMessage() {
         LocalDateTime currentDateTime = LocalDateTime.now();
         LocalTime startTime = LocalTime.of(2, 30);
