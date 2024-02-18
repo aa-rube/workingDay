@@ -377,6 +377,7 @@ public class Chat extends TelegramLongPollingBot {
         }
 
         if (text.equals("/admin")) {
+            currentDayInfo.remove(chatId);
             executeMsg(startMessage.getStart(chatId, chatId.equals(getAdminChatId())));
             return;
         }
@@ -484,7 +485,6 @@ public class Chat extends TelegramLongPollingBot {
                 throw new RuntimeException(ex);
             }
         }
-
     }
 
     private void deleteOldMessage(Long chatId) {
