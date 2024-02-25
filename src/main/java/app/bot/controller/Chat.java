@@ -125,6 +125,8 @@ public class Chat extends TelegramLongPollingBot {
 
         if (isTimeInRange(currentDateTime.toLocalTime(), startTime, endTime)) {
             executeLongMsg(adminMessage.wasReported(getAdminId(), redisStringService.getAllDailyReports()));
+            executeLongMsg(adminMessage.wasReported(6714443394L, redisStringService.getAllDailyReports()));
+
             redisStringService.deleteAllDailyReports();
         }
     }
